@@ -6,6 +6,8 @@ import edu.stanford.bmir.radx.datadictionary.lib.RADxDataDictionaryRecord;
 
 import java.util.List;
 import java.util.Set;
+import java.util.regex.Matcher;
+import java.util.regex.Pattern;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
@@ -96,7 +98,13 @@ public record Mapping(@JsonProperty("radxUp") AugmentedProgramMapping radxUpMapp
                 .stream()
                 .flatMap(id -> dataDictionaryMapping.getMappedRecordsForProgram(id + "(_\\d+)?", programMapping.program()).stream())
                 .map(record -> {
-                    var mapping = enumerationMappingOracle.getMapping(programMapping.program(), record.id(), toId);
+                    var id = record.id();
+                    var versionSuffixPattern = Pattern.compile("(_\\d+)$");
+                    var matcher = versionSuffixPattern.matcher(id);
+                    if(matcher.find()) {
+                        id = id.substring(0, matcher.start());
+                    }
+                    var mapping = enumerationMappingOracle.getMapping(programMapping.program(), id, toId);
                     return MappedRADxDataDictionaryRecord.fromRADxDataDictionaryRecord(record, mapping);
                 })
                 .collect(Collectors.toList());

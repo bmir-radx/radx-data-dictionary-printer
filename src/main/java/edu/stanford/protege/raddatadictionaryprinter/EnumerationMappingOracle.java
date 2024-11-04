@@ -6,6 +6,7 @@ import java.util.ArrayList;
 import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.regex.Pattern;
 
 public class EnumerationMappingOracle {
 
@@ -17,11 +18,12 @@ public class EnumerationMappingOracle {
 
 
     public List<EnumerationChoiceMapping> getMapping(RadxProgram program,
-                                                                String fromVariableId,
+                                                                String fromVariableIdRegex,
                                                                 String toVariableId) {
+        var fromVariablePattern = Pattern.compile(fromVariableIdRegex);
         return records.stream()
                 .filter(r -> r.program().equals(program))
-                .filter(r -> r.fromVariable().equals(fromVariableId))
+                .filter(r -> fromVariablePattern.matcher(r.fromVariable()).matches())
                 .filter(r -> r.toVariable().equals(toVariableId))
                 .map(r -> {
                     var from = new EnumerationChoice(r.fromValue(), r.fromLabel(), "");

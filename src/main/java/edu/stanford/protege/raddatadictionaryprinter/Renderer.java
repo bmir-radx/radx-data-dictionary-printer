@@ -6,6 +6,8 @@ import org.commonmark.parser.Parser;
 import org.commonmark.renderer.html.HtmlRenderer;
 
 import java.util.List;
+import java.util.regex.Matcher;
+import java.util.regex.Pattern;
 
 public class Renderer {
 
@@ -54,8 +56,14 @@ public class Renderer {
 
 
         var harmonizedIds = record.mapping().getHarmonizedIds();
+        var versionSuffixPattern = Pattern.compile("(_\\d+)$");
         for(var harmonizedId : harmonizedIds) {
-            markdown = markdown.replace("`" + harmonizedId + "`", "<span class=\"harmonized-id badge\">" + harmonizedId + "</span>");
+            var strippedId = harmonizedId;
+            var matcher = versionSuffixPattern.matcher(harmonizedId);
+            if(matcher.find()) {
+                strippedId = harmonizedId.substring(0, matcher.start());
+            }
+            markdown = markdown.replaceAll("`" + strippedId + "`", "<span class=\"harmonized-id badge\">" + harmonizedId + "</span>");
         }
 
         for(var id : sectionedDataDictionary.getIds()) {
